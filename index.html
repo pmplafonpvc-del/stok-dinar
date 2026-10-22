@@ -1,0 +1,1087 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Stok Dinar</title>
+<meta name="description" content="Catat stok emas dinar & gram, offline.">
+<meta name="theme-color" content="#2a2216">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Stok Dinar">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+:root{
+  --bg:#f6f3ec;--card:#fffdf9;--ink:#211c13;--muted:#73695a;--line:#e8e0d0;
+  --gold:#9a6d14;--gold-2:#c99a2e;--gold-soft:#f5ead0;
+  --in:#1d7a4c;--in-soft:#e2f2e8;--out:#b03e2c;--out-soft:#f9e3dd;
+  --warn:#8a5200;--warn-soft:#fff1d6;
+  --hero1:#2a2216;--hero2:#4f3d1b;--heroInk:#fbf3df;
+  --r:16px;--sh:0 1px 2px rgba(40,30,10,.06),0 6px 20px rgba(40,30,10,.05);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#13110d;--card:#1d1a14;--ink:#f3ecdd;--muted:#a89f8d;--line:#332d22;
+  --gold:#e2b752;--gold-2:#f0cd73;--gold-soft:#2e2615;
+  --in:#56c78f;--in-soft:#15291e;--out:#f08a74;--out-soft:#34201b;
+  --warn:#f2b55a;--warn-soft:#33270f;
+  --hero1:#2a2216;--hero2:#3d3018;--sh:none;color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+.num,td,.big{font-variant-numeric:tabular-nums}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+h1,h2,h3{margin:0;line-height:1.2}
+small,.muted{color:var(--muted)}
+a{color:var(--gold)}
+
+/* layout */
+.app{display:flex;min-height:100vh}
+nav.nav{background:var(--card);display:flex;z-index:30}
+nav.nav button{border:0;background:none;display:flex;align-items:center;gap:10px;color:var(--muted);border-radius:12px}
+nav.nav button svg{width:22px;height:22px;flex:none}
+nav.nav button.on{color:var(--gold)}
+.brand{display:none}
+main{flex:1;min-width:0}
+.wrap{max-width:1080px;margin:0 auto}
+@media (max-width:899px){
+  nav.nav{position:fixed;left:0;right:0;bottom:0;border-top:1px solid var(--line);padding:4px 4px calc(4px + env(safe-area-inset-bottom))}
+  nav.nav button{flex:1;flex-direction:column;gap:2px;font-size:11px;padding:6px 0}
+  main{padding:calc(14px + env(safe-area-inset-top)) 16px 100px}
+}
+@media (min-width:900px){
+  nav.nav{flex-direction:column;width:228px;flex:none;position:sticky;top:0;height:100vh;border-right:1px solid var(--line);padding:22px 14px;gap:4px}
+  nav.nav button{padding:11px 14px;font-size:15px;font-weight:500}
+  nav.nav button.on{background:var(--gold-soft)}
+  .brand{display:flex;align-items:center;gap:10px;padding:0 10px 22px;font-weight:700;font-size:17px}
+  .brand img{width:34px;height:34px;border-radius:9px}
+  main{padding:30px 40px 60px}
+}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.top h1{font-size:24px;letter-spacing:-.01em}
+.top p{margin:4px 0 0;color:var(--muted);font-size:14px}
+
+/* cards */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:16px}
+.card+.card,.stack>*+*{margin-top:14px}
+.card h2{font-size:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cols{display:grid;gap:14px}
+@media (min-width:900px){.cols{grid-template-columns:1.15fr 1fr;align-items:start}}
+.hero{background:linear-gradient(135deg,var(--hero1),var(--hero2));color:var(--heroInk);border:0;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;right:-60px;top:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(240,205,115,.35),transparent 70%)}
+.hero .lbl{font-size:13px;opacity:.8;display:flex;justify-content:space-between;align-items:center}
+.hero .big{font-size:38px;font-weight:700;letter-spacing:-.02em;margin:6px 0 2px;color:#f6d77e}
+.hero .sub{font-size:15px;opacity:.9}
+.unit-tg{display:inline-flex;background:rgba(255,255,255,.12);border-radius:999px;padding:3px;position:relative;z-index:1}
+.unit-tg button{border:0;background:none;color:inherit;padding:4px 12px;border-radius:999px;font-size:13px}
+.unit-tg button.on{background:#f6d77e;color:#2a2216;font-weight:600}
+.stat .k{font-size:12.5px;color:var(--muted)}
+.grid2>.card{margin-top:0}
+.stat .v{font-size:clamp(15px,4.4vw,20px);font-weight:700;margin-top:2px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat .h{font-size:12px;color:var(--muted);margin-top:2px}
+.actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.act{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:12px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:600;font-size:14px;box-shadow:var(--sh)}
+.act .ic{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:20px;font-weight:700}
+.act.in .ic{background:var(--in-soft);color:var(--in)}
+.act.out .ic{background:var(--out-soft);color:var(--out)}
+.act.pr .ic{background:var(--gold-soft);color:var(--gold)}
+
+/* buttons */
+.btn{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 16px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px}
+.btn.pri{background:var(--gold);border-color:var(--gold);color:#fff}
+@media (prefers-color-scheme:dark){.btn.pri,.btn.in,.btn.out,.seg button.on[data-type]{color:#14110b!important}}
+.btn.in{background:var(--in);border-color:var(--in);color:#fff}
+.btn.out{background:var(--out);border-color:var(--out);color:#fff}
+.btn.danger{color:var(--out);border-color:var(--out-soft)}
+.btn.sm{min-height:34px;padding:6px 12px;font-size:13.5px;border-radius:10px}
+.btn.block{width:100%}
+.btn:disabled{opacity:.5}
+.link{border:0;background:none;color:var(--gold);font-weight:600;padding:4px;font-size:14px}
+.row-btns{display:flex;gap:10px;flex-wrap:wrap}
+.row-btns .btn{flex:1}
+
+/* lists */
+.list{margin:0 -16px}
+.li{display:flex;align-items:center;gap:12px;padding:11px 16px;border-top:1px solid var(--line)}
+.li:first-child{border-top:0}
+.li.click{cursor:pointer}
+.li.click:hover{background:var(--gold-soft)}
+.li .main{flex:1;min-width:0}
+.li .main b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li .main small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li .r{text-align:right;flex:none}
+.li .r b{display:block}
+.badge{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;flex:none;font-size:15px}
+.badge.in{background:var(--in-soft);color:var(--in)}
+.badge.out{background:var(--out-soft);color:var(--out)}
+.c-in{color:var(--in)}.c-out{color:var(--out)}
+.grp{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;padding:14px 0 6px}
+.grp:first-child{padding-top:0}
+.dayhead{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);font-weight:600;padding:16px 2px 6px}
+.empty{text-align:center;color:var(--muted);padding:26px 10px}
+.empty.sm{padding:14px}
+.note{border-radius:12px;padding:10px 14px;font-size:14px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.note.warn{background:var(--warn-soft);color:var(--warn)}
+.note.info{background:var(--gold-soft);color:var(--ink)}
+.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;display:flex}
+.bar i{display:block;height:100%}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:8px}
+.legend span:before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--c);margin-right:6px;vertical-align:-1px}
+
+/* forms */
+label.f{display:block;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:12px}
+label.f input,label.f select,label.f textarea,.inp{display:block;width:100%;margin-top:5px;border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:11px 12px;font-size:16px;color:var(--ink);font-weight:500;min-height:46px}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--gold-2);outline-offset:0;border-color:transparent}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:4px;gap:4px;margin-bottom:14px}
+.seg button{border:0;background:none;border-radius:10px;padding:10px;font-weight:700;color:var(--muted)}
+.seg button.on[data-type=in]{background:var(--in);color:#fff}
+.seg button.on[data-type=out]{background:var(--out);color:#fff}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);background:var(--card);border-radius:12px;padding:8px 12px;text-align:left;line-height:1.2;min-width:84px}
+.chip b{display:block;font-size:14px}
+.chip small{font-size:11.5px}
+.chip.on{border-color:var(--gold);background:var(--gold-soft);box-shadow:0 0 0 1px var(--gold)}
+.chip.dim{opacity:.45}
+.qty{display:flex;align-items:center;gap:8px;margin:14px 0 6px}
+.qty button{width:48px;height:48px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-size:22px;font-weight:700;flex:none}
+.qty input{flex:1;text-align:center;font-size:22px;font-weight:700;border:1px solid var(--line);background:var(--bg);border-radius:12px;height:48px;min-width:0}
+.qty .u{min-width:56px;color:var(--muted);font-weight:600}
+.calc{font-size:13.5px;color:var(--muted);min-height:20px;margin-bottom:12px}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 13px;font-size:13.5px;font-weight:600;color:var(--muted)}
+.pill.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.filters select{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 10px;font-size:14px;min-height:40px;max-width:100%}
+
+/* price table */
+.ptab{width:100%;border-collapse:collapse}
+.ptab th{font-size:12px;color:var(--muted);text-align:left;font-weight:600;padding:4px 4px 6px}
+.ptab td{padding:4px}
+.ptab td:first-child{font-weight:600;font-size:14px;white-space:nowrap;padding-right:8px}
+.ptab input{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:9px 10px;font-size:15px;text-align:right;min-height:42px;font-variant-numeric:tabular-nums;color:var(--ink)}
+.ptab .d{display:block;font-size:11px;text-align:right;min-height:14px;font-weight:600}
+.ptab tr.grow td{padding-top:14px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.sticky-save{position:sticky;bottom:72px;margin:14px -16px -16px;padding:12px 16px;background:var(--card);border-top:1px solid var(--line);border-radius:0 0 var(--r) var(--r);z-index:5}
+@media (min-width:900px){.sticky-save{bottom:0}}
+
+/* table */
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:right;font-size:12px;color:var(--muted);font-weight:600;padding:6px;border-bottom:1px solid var(--line)}
+.tbl td{text-align:right;padding:8px 6px;border-bottom:1px solid var(--line)}
+.tbl th:first-child,.tbl td:first-child{text-align:left;white-space:nowrap}
+.tbl tfoot td{font-weight:700;border-bottom:0}
+.scroll-x{overflow-x:auto;margin:0 -16px;padding:0 16px}
+
+/* chart */
+.chart{position:relative;width:100%;touch-action:pan-y}
+.chart svg{display:block}
+.chart text{fill:var(--muted);font-size:11px}
+.tip{position:absolute;top:4px;background:var(--ink);color:var(--bg);font-size:12px;border-radius:8px;padding:6px 9px;pointer-events:none;white-space:nowrap;z-index:2}
+.tip b{display:block}
+
+/* modal */
+.mwrap{position:fixed;inset:0;background:rgba(20,15,5,.45);z-index:50;display:flex;align-items:flex-end;justify-content:center;animation:fade .15s}
+.sheet{background:var(--card);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:22px 22px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));animation:up .2s ease-out}
+@media (min-width:700px){.mwrap{align-items:center}.sheet{border-radius:22px;max-height:88vh}}
+.shead{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.shead h3{font-size:18px}
+.x{border:0;background:var(--bg);width:36px;height:36px;border-radius:50%;font-size:20px;line-height:1}
+@keyframes up{from{transform:translateY(30px);opacity:.5}}
+@keyframes fade{from{opacity:0}}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:12px;font-weight:600;font-size:14px;z-index:80;box-shadow:0 8px 30px rgba(0,0,0,.2);max-width:calc(100% - 32px);text-align:center}
+@media (min-width:900px){.toast{bottom:28px}}
+
+/* lock */
+#lock{position:fixed;inset:0;z-index:100;background:linear-gradient(160deg,var(--hero1),#16120b);color:var(--heroInk);display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:20px}
+#lock.show{display:flex}
+#lock img{width:64px;height:64px;border-radius:16px}
+.dots{display:flex;gap:14px;height:16px}
+.dots i{width:14px;height:14px;border-radius:50%;border:2px solid #f6d77e}
+.dots i.f{background:#f6d77e}
+.dots.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.keys{display:grid;grid-template-columns:repeat(3,72px);gap:14px}
+.keys button{height:72px;border-radius:50%;border:0;background:rgba(255,255,255,.1);color:#fff;font-size:26px;font-weight:500}
+.keys button:active{background:rgba(255,255,255,.25)}
+.keys button.t{background:none;font-size:15px}
+.hide{display:none!important}
+.sp{height:10px}
+.right{text-align:right}
+.mt{margin-top:12px}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="nav" id="nav">
+    <div class="brand"><img src="icon.svg" alt="">Stok Dinar</div>
+    <button data-go="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span>Beranda</span></button>
+    <button data-go="tx"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4"/></svg><span>Transaksi</span></button>
+    <button data-go="price"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><span>Harga</span></button>
+    <button data-go="report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg><span>Laporan</span></button>
+    <button data-go="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Pengaturan</span></button>
+  </nav>
+  <main><div class="wrap" id="view"></div></main>
+</div>
+
+<div id="lock">
+  <img src="icon.svg" alt="">
+  <div style="font-weight:600;font-size:17px">Masukkan PIN</div>
+  <div class="dots" id="dots"></div>
+  <div class="keys" id="keys"></div>
+</div>
+<input type="file" id="fileIn" accept=".json,application/json" class="hide">
+
+<script>
+'use strict';
+const VERSION = '1.0.0';
+const KEY = 'stokdinar.v1';
+const GPD = 4.25; // gram per 1 Dinar
+const GROUPS = {
+  dinar: {name: 'Dinar KR', priced: 'pc'},
+  mr:    {name: 'MR Gold', priced: 'pc'},
+  lain:  {name: 'Emas Lain', priced: 'gram'}
+};
+const GROUP_ORDER = ['dinar', 'mr', 'lain'];
+const BASE_TS = '2026-01-01T00:00:00.000Z';
+
+/* ---------- utils ---------- */
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const pad = n => String(n).padStart(2, '0');
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
+const nowISO = () => new Date().toISOString();
+const r6 = n => Math.round(n * 1e6) / 1e6;
+function today() { const d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function addDays(ds, n) { const [y, m, d] = ds.split('-').map(Number); const t = new Date(Date.UTC(y, m - 1, d + n)); return t.getUTCFullYear() + '-' + pad(t.getUTCMonth() + 1) + '-' + pad(t.getUTCDate()); }
+function dms(ds) { const [y, m, d] = ds.split('-').map(Number); return Date.UTC(y, m - 1, d); }
+function daysBetween(a, b) { return Math.round((dms(b) - dms(a)) / 864e5); }
+const BULAN = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+const BULAN_P = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+const HARI = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+function fDate(ds, long) { if (!ds) return '—'; const [y, m, d] = ds.split('-').map(Number); if (long) { const w = new Date(Date.UTC(y, m - 1, d)).getUTCDay(); return HARI[w] + ', ' + d + ' ' + BULAN_P[m - 1] + ' ' + y; } return d + ' ' + BULAN[m - 1] + ' ' + y; }
+function relDay(ds) { const n = daysBetween(ds, today()); if (n === 0) return 'hari ini'; if (n === 1) return 'kemarin'; if (n > 1) return n + ' hari lalu'; return fDate(ds); }
+const fNum = (n, d = 3) => (n == null || isNaN(n)) ? '—' : Number(n).toLocaleString('id-ID', {maximumFractionDigits: d});
+const fRp = n => (n == null || isNaN(n)) ? '—' : (n < 0 ? '−Rp ' : 'Rp ') + Math.round(Math.abs(n)).toLocaleString('id-ID');
+const fG = n => fNum(n, 4) + ' g';
+const fD = n => fNum(n, 3) + ' Dinar';
+function fCompact(n) { const a = Math.abs(n), s = n < 0 ? '−' : ''; if (a >= 1e9) return s + fNum(a / 1e9, 2) + ' M'; if (a >= 1e6) return s + fNum(a / 1e6, 1) + ' jt'; if (a >= 1e3) return s + fNum(a / 1e3, 0) + ' rb'; return s + fNum(a, 2); }
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function parseRp(s) { const d = String(s ?? '').replace(/\D/g, ''); return d ? Number(d) : null; }
+function parseDec(s) { s = String(s ?? '').trim().replace(/\s/g, ''); if (!s) return NaN; if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.'); return Number(s); }
+function rpInput(el) { el.addEventListener('input', () => { const n = parseRp(el.value); el.value = n == null ? '' : n.toLocaleString('id-ID'); }); }
+function toast(msg, ms = 2400) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), ms); }
+function guessDevice() { const u = navigator.userAgent; if (/iPhone/.test(u)) return 'iPhone'; if (/iPad/.test(u)) return 'iPad'; if (/Android/.test(u)) return 'HP Android'; if (/Mac/.test(u)) return 'Mac'; if (/Windows/.test(u)) return 'PC Windows'; return 'Perangkat'; }
+
+/* ---------- data ---------- */
+function defaultProducts() {
+  const out = [];
+  [['0.125','1/8'],['0.25','1/4'],['0.5','1/2'],['1','1'],['2','2'],['3','3'],['4','4'],['5','5'],['7','7'],['8','8'],['10','10'],['20','20']]
+    .forEach(([k, l]) => out.push({id: 'dinar-' + k, group: 'dinar', name: l + ' Dinar', gram: +k * GPD, updatedAt: BASE_TS}));
+  [0.025, 0.05, 0.1, 0.2, 0.5]
+    .forEach(g => out.push({id: 'mr-' + g, group: 'mr', name: 'MR Gold ' + String(g).replace('.', ',') + ' g', gram: g, updatedAt: BASE_TS}));
+  [1, 2, 3, 5, 10, 25, 50, 100]
+    .forEach(g => out.push({id: 'g-' + g, group: 'lain', name: 'Emas ' + g + ' gram', gram: g, updatedAt: BASE_TS}));
+  out.push({id: 'g-bulk', group: 'lain', name: 'Emas timbang (gram bebas)', gram: 1, bulk: true, updatedAt: BASE_TS});
+  return out;
+}
+function seedPrices() {
+  // Harga DinarKR 22 Okt 2026 10.32 WIB (dinarkr.com) sebagai contoh awal
+  const v = {'0.125':[1602000,1499000],'0.25':[3054000,2874000],'0.5':[6083000,5761000],'1':[12160000,11553000],'2':[24252000,23088000],'3':[36389000,34716000],'4':[48486000,46353000],'5':[60564000,58020000],'7':[84787000,81566000],'8':[96818000,93430000],'10':[120999000,117370000]};
+  const p = {}; for (const k in v) p['dinar-' + k] = {b: v[k][0], s: v[k][1]};
+  return {'2026-10-22': {date: '2026-10-22', updatedAt: '2026-10-22T03:32:00.000Z', p, g: {b: null, s: null}}};
+}
+function freshState() {
+  return {v: 1, device: {id: uid(), name: guessDevice()}, products: defaultProducts(), tx: [], prices: seedPrices(),
+          settings: {pinHash: null, pinSalt: null}, ui: {unit: 'gram'}, lastBackup: null};
+}
+let S;
+function load() {
+  let s = null; try { s = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+  if (!s || !Array.isArray(s.products)) s = freshState();
+  for (const p of defaultProducts()) if (!s.products.find(x => x.id === p.id)) s.products.push(p);
+  s.tx = s.tx || []; s.prices = s.prices || {}; s.settings = s.settings || {}; s.ui = s.ui || {unit: 'gram'};
+  s.device = s.device || {id: uid(), name: guessDevice()};
+  return s;
+}
+function save() {
+  invalidate();
+  try { localStorage.setItem(KEY, JSON.stringify(S)); }
+  catch (e) { toast('Gagal menyimpan! Memori perangkat penuh?', 5000); }
+}
+
+let _pd = null;
+function invalidate() { _pd = null; }
+function priceDates() { if (!_pd) _pd = Object.keys(S.prices).filter(d => !S.prices[d].deleted).sort(); return _pd; }
+const prod = id => S.products.find(p => p.id === id);
+function products(all) {
+  return S.products.filter(p => !p.deleted && (all || !p.hidden))
+    .sort((a, b) => GROUP_ORDER.indexOf(a.group) - GROUP_ORDER.indexOf(b.group) || (!!a.bulk - !!b.bulk) || a.gram - b.gram || a.name.localeCompare(b.name));
+}
+const unitOf = p => p && p.bulk ? 'gram' : 'keping';
+const fQty = (p, q) => p && p.bulk ? fNum(q, 4) + ' g' : fNum(q, 0) + ' keping';
+
+// harga per satuan (per keping, atau per gram untuk "gram bebas") pada tanggal tertentu
+function unitPrice(p, date) {
+  const ds = priceDates();
+  for (let i = ds.length - 1; i >= 0; i--) {
+    const d = ds[i]; if (d > date) continue; const r = S.prices[d];
+    if (GROUPS[p.group].priced === 'gram') {
+      if (r.g && (r.g.b || r.g.s)) return {b: r.g.b ? r.g.b * p.gram : null, s: r.g.s ? r.g.s * p.gram : null, date: d};
+    } else {
+      const x = r.p && r.p[p.id];
+      if (x && (x.b || x.s)) return {b: x.b || null, s: x.s || null, date: d};
+    }
+  }
+  if (p.group === 'dinar' && p.id !== 'dinar-1') {
+    const base = prod('dinar-1'); const u = base && unitPrice(base, date);
+    if (u) { const k = p.gram / GPD; return {b: u.b && u.b * k, s: u.s && u.s * k, date: u.date, est: true}; }
+  }
+  return null;
+}
+function stockAt(to, from) {
+  const m = {};
+  for (const t of S.tx) {
+    if (t.deleted) continue; if (to && t.date > to) continue; if (from && t.date < from) continue;
+    m[t.pid] = r6((m[t.pid] || 0) + (t.type === 'in' ? t.qty : -t.qty));
+  }
+  return m;
+}
+function valuation(stock, date) {
+  let gram = 0, b = 0, s = 0, est = false, oldest = null; const missing = [], rows = [];
+  for (const p of products(true)) {
+    const q = stock[p.id] || 0; if (!q) continue;
+    const g = q * p.gram; gram += g;
+    const u = unitPrice(p, date); let vb = null, vs = null;
+    if (u) { if (u.b != null) { vb = u.b * q; b += vb; } if (u.s != null) { vs = u.s * q; s += vs; } if (u.est) est = true; if (!oldest || u.date < oldest) oldest = u.date; }
+    else missing.push(p.name);
+    rows.push({p, q, g, vb, vs, u});
+  }
+  return {gram: r6(gram), dinar: gram / GPD, b, s, est, oldest, missing, rows};
+}
+const activeTx = () => S.tx.filter(t => !t.deleted);
+
+/* ---------- modal ---------- */
+function openModal(html, mount) {
+  closeModal();
+  const w = document.createElement('div'); w.className = 'mwrap'; w.id = 'modal';
+  w.innerHTML = '<div class="sheet" role="dialog" aria-modal="true">' + html + '</div>';
+  w.addEventListener('click', e => { if (e.target === w) closeModal(); });
+  document.body.appendChild(w); document.body.style.overflow = 'hidden';
+  if (mount) mount(w.firstChild);
+}
+function closeModal() { const m = $('#modal'); if (m) m.remove(); document.body.style.overflow = ''; }
+const shead = t => `<div class="shead"><h3>${t}</h3><button class="x" data-act="close" aria-label="Tutup">×</button></div>`;
+function ask(title, body, okLabel = 'Ya', danger) {
+  // dialog konfirmasi bertumpuk di atas modal yang sedang terbuka
+  return new Promise(res => {
+    const w = document.createElement('div'); w.className = 'mwrap'; w.style.zIndex = 60;
+    w.innerHTML = `<div class="sheet" role="alertdialog" aria-modal="true">${shead(title)}<p style="margin:0 0 18px">${body}</p><div class="row-btns"><button class="btn" data-a="0">Batal</button><button class="btn ${danger ? 'out' : 'pri'}" data-a="1">${okLabel}</button></div></div>`;
+    w.addEventListener('click', e => {
+      const b = e.target.closest('[data-a],[data-act=close]');
+      if (e.target === w || b) { e.stopPropagation(); w.remove(); res(!!(b && b.dataset.a === '1')); }
+    });
+    document.body.appendChild(w);
+  });
+}
+
+/* ---------- router ---------- */
+let VIEW = 'home';
+const VIEWS = {};
+let CHARTS = [];
+function go(v) { VIEW = v; render(); window.scrollTo(0, 0); }
+function render() {
+  CHARTS = [];
+  $('#view').innerHTML = VIEWS[VIEW]();
+  $$('#nav [data-go]').forEach(b => b.classList.toggle('on', b.dataset.go === VIEW));
+  const after = VIEWS[VIEW].after; if (after) after();
+  drawCharts();
+}
+
+/* ---------- BERANDA ---------- */
+VIEWS.home = () => {
+  const td = today(), st = stockAt(), V = valuation(st, td);
+  const unit = S.ui.unit || 'gram';
+  const big = unit === 'gram' ? fNum(V.gram, 4) + ' <span style="font-size:20px">gram</span>' : fNum(V.dinar, 3) + ' <span style="font-size:20px">Dinar</span>';
+  const sub = unit === 'gram' ? '≈ ' + fD(V.dinar) : '= ' + fG(V.gram);
+  const lastP = priceDates().slice(-1)[0];
+  let warn = '';
+  if (!lastP) warn = `<div class="note warn"><span>Belum ada harga. Isi harga hari ini agar nilai rupiah muncul.</span><button class="btn sm" data-go="price">Isi harga</button></div>`;
+  else if (lastP < td) warn = `<div class="note warn"><span>Harga terakhir: <b>${fDate(lastP)}</b> (${relDay(lastP)}).</span><button class="btn sm" data-go="price">Update harga</button></div>`;
+  if (V.missing.length) warn += `<div class="note warn mt"><span>Belum ada harga untuk: ${esc(V.missing.join(', '))}. Nilainya belum dihitung.</span></div>`;
+  const nTx = activeTx().length;
+  if (nTx && (!S.lastBackup || daysBetween(S.lastBackup.slice(0, 10), td) >= 7))
+    warn += `<div class="note info mt"><span>💾 ${S.lastBackup ? 'Backup terakhir ' + relDay(S.lastBackup.slice(0, 10)) : 'Belum pernah backup'}. Simpan backup agar data aman & bisa dipindah ke perangkat lain.</span><button class="btn sm" data-act="backup">Backup</button></div>`;
+
+  // komposisi per kelompok
+  const gg = {}; V.rows.forEach(r => gg[r.p.group] = (gg[r.p.group] || 0) + r.g);
+  const gcol = {dinar: 'var(--gold)', mr: 'var(--gold-2)', lain: 'var(--muted)'};
+  const comp = V.gram > 0 ? `<div class="bar">${GROUP_ORDER.filter(g => gg[g] > 0).map(g => `<i style="width:${gg[g] / V.gram * 100}%;background:${gcol[g]}"></i>`).join('')}</div>
+    <div class="legend">${GROUP_ORDER.filter(g => gg[g]).map(g => `<span style="--c:${gcol[g]}">${GROUPS[g].name} ${fG(gg[g])}</span>`).join('')}</div>` : '';
+
+  let list = '';
+  for (const g of GROUP_ORDER) {
+    const rows = V.rows.filter(r => r.p.group === g); if (!rows.length) continue;
+    list += `<div class="grp">${GROUPS[g].name}</div><div class="list">` + rows.map(r => `
+      <div class="li"><div class="main"><b>${esc(r.p.name)}</b><small>${fQty(r.p, r.q)} · ${fG(r.g)}</small></div>
+      <div class="r"><b class="num">${fRp(r.vs)}</b><small>${r.u ? (r.u.est ? 'perkiraan' : 'buyback') : 'harga belum ada'}</small></div></div>`).join('') + '</div>';
+  }
+  const recent = activeTx().sort((a, b) => b.date.localeCompare(a.date) || (b.createdAt || '').localeCompare(a.createdAt || '')).slice(0, 5);
+
+  return `
+  <div class="top"><div><h1>Stok Emas</h1><p>${fDate(td, true)}</p></div></div>
+  <div class="cols"><div class="stack">
+    <div class="card hero">
+      <div class="lbl"><span>Total emas saya</span>
+        <span class="unit-tg"><button data-unit="gram" class="${unit === 'gram' ? 'on' : ''}">Gram</button><button data-unit="dinar" class="${unit === 'dinar' ? 'on' : ''}">Dinar</button></span></div>
+      <div class="big num">${big}</div><div class="sub num">${sub}</div>
+    </div>
+    <div class="grid2">
+      <div class="card stat"><div class="k">Nilai jual (buyback)</div><div class="v num">${fRp(V.s)}</div><div class="h">${V.oldest ? 'harga ' + fDate(V.oldest) : 'belum ada harga'}${V.est ? ' · sebagian perkiraan' : ''}</div></div>
+      <div class="card stat"><div class="k">Nilai beli (pasar)</div><div class="v num">${fRp(V.b)}</div><div class="h">selisih ${fRp(V.b - V.s)}</div></div>
+    </div>
+    <div class="actions">
+      <button class="act in" data-act="txin"><span class="ic">+</span>Emas Masuk</button>
+      <button class="act out" data-act="txout"><span class="ic">−</span>Emas Keluar</button>
+      <button class="act pr" data-go="price"><span class="ic">Rp</span>Harga Hari Ini</button>
+    </div>
+    ${warn ? '<div>' + warn + '</div>' : ''}
+  </div>
+  <div class="stack">
+    <div class="card"><h2>Rincian stok <span class="muted" style="font-size:13px;font-weight:500">${V.rows.length} jenis</span></h2>
+      ${comp ? comp + '<div class="sp"></div>' : ''}
+      ${list || '<div class="empty">Belum ada stok.<br>Tekan <b>Emas Masuk</b> untuk mulai mencatat.</div>'}
+    </div>
+    <div class="card"><h2>Transaksi terakhir ${recent.length ? '<button class="link" data-go="tx">Lihat semua</button>' : ''}</h2>
+      ${recent.length ? '<div class="list">' + recent.map(txRow).join('') + '</div>' : '<div class="empty sm">Belum ada transaksi</div>'}
+    </div>
+  </div></div>`;
+};
+
+function txRow(t) {
+  const p = prod(t.pid) || {name: '(jenis terhapus)', gram: 0};
+  const sign = t.type === 'in' ? '+' : '−';
+  return `<div class="li click" data-act="edit" data-id="${t.id}">
+    <span class="badge ${t.type}">${t.type === 'in' ? '▲' : '▼'}</span>
+    <div class="main"><b>${esc(p.name)}</b><small>${fDate(t.date)}${t.note ? ' · ' + esc(t.note) : ''}</small></div>
+    <div class="r"><b class="num c-${t.type}">${sign}${fQty(p, t.qty)}</b><small class="num">${fG(t.qty * p.gram)}${t.total ? ' · ' + fRp(t.total) : ''}</small></div></div>`;
+}
+
+/* ---------- FORM TRANSAKSI ---------- */
+function openTxForm(type, tx) {
+  let ttype = tx ? tx.type : type, sel = tx ? tx.pid : null;
+  const html = shead(tx ? 'Ubah transaksi' : 'Catat emas') + `
+    <div class="seg"><button data-type="in">▲ Masuk</button><button data-type="out">▼ Keluar</button></div>
+    <label class="f">Tanggal<input type="date" id="fDate" value="${tx ? tx.date : today()}" max="${today()}"></label>
+    <div class="f" style="font-size:13px;color:var(--muted);font-weight:600;margin-bottom:6px">Jenis emas</div>
+    <div id="chips"></div>
+    <div class="qty"><button type="button" data-step="-1" aria-label="Kurangi">−</button><input id="fQty" inputmode="decimal" value="${tx ? String(tx.qty).replace('.', ',') : '1'}" aria-label="Jumlah"><button type="button" data-step="1" aria-label="Tambah">+</button><span class="u" id="fUnit">keping</span></div>
+    <div class="calc" id="fCalc"></div>
+    <label class="f">Nominal Rp (opsional)<input id="fTotal" inputmode="numeric" placeholder="mis. harga beli / jual total" value="${tx && tx.total ? tx.total.toLocaleString('id-ID') : ''}"></label>
+    <label class="f">Catatan (opsional)<input id="fNote" maxlength="120" placeholder="mis. beli di mitra, hadiah, dijual" value="${tx ? esc(tx.note || '') : ''}"></label>
+    <div class="row-btns">${tx ? '<button class="btn danger" id="fDel">Hapus</button>' : '<button class="btn" id="fAgain">Simpan & tambah lagi</button>'}<button class="btn pri" id="fSave">Simpan</button></div>`;
+  openModal(html, el => {
+    const qtyEl = $('#fQty', el), dateEl = $('#fDate', el);
+    rpInput($('#fTotal', el));
+    const avail = pid => { const st = stockAt(); let q = st[pid] || 0; if (tx && tx.pid === pid) q = r6(q + (tx.type === 'out' ? tx.qty : -tx.qty)); return q; };
+    function drawChips() {
+      let h = '';
+      for (const g of GROUP_ORDER) {
+        const ps = products(false).filter(p => p.group === g || false);
+        if (sel && !ps.find(p => p.id === sel) && prod(sel) && prod(sel).group === g) ps.push(prod(sel));
+        if (!ps.length) continue;
+        h += `<div class="grp">${GROUPS[g].name}</div><div class="chips">` + ps.map(p => {
+          const a = avail(p.id);
+          return `<button type="button" class="chip ${p.id === sel ? 'on' : ''} ${ttype === 'out' && a <= 0 ? 'dim' : ''}" data-pid="${p.id}"><b>${esc(p.name.replace(/^MR Gold /, '').replace(/^Emas (?=\d)/, ''))}</b><small>${a ? 'stok ' + fNum(a, 4) : (p.bulk ? 'berat bebas' : p.group === 'mr' ? 'MR Gold' : fNum(p.gram, 4) + ' g')}</small></button>`;
+        }).join('') + '</div>';
+      }
+      $('#chips', el).innerHTML = h;
+      $$('.seg button', el).forEach(b => b.classList.toggle('on', b.dataset.type === ttype));
+      $('#fSave', el).className = 'btn ' + (ttype === 'in' ? 'in' : 'out');
+      calc();
+    }
+    function calc() {
+      const p = sel && prod(sel); const q = parseDec(qtyEl.value);
+      $('#fUnit', el).textContent = unitOf(p);
+      if (!p) { $('#fCalc', el).textContent = 'Pilih jenis emas di atas'; return; }
+      if (!(q > 0)) { $('#fCalc', el).textContent = ''; return; }
+      const g = q * p.gram; const u = unitPrice(p, dateEl.value || today());
+      let t = `${p.bulk ? '' : fNum(q, 0) + ' × '}${p.name.replace(/ \(gram bebas\)$/, '')} = ${fG(g)} ≈ ${fD(g / GPD)}`;
+      if (u) { const v = ttype === 'in' ? u.b : u.s; if (v) t += ` · ≈ ${fRp(v * q)} (${ttype === 'in' ? 'harga beli' : 'buyback'})`; }
+      if (ttype === 'out') t += ` · stok ${fQty(p, avail(p.id))}`;
+      $('#fCalc', el).textContent = t;
+    }
+    el.addEventListener('click', e => {
+      const c = e.target.closest('[data-pid]'); if (c) { sel = c.dataset.pid; drawChips(); return; }
+      const s = e.target.closest('[data-type]'); if (s) { ttype = s.dataset.type; drawChips(); return; }
+      const st = e.target.closest('[data-step]'); if (st) { const q = parseDec(qtyEl.value) || 0; const p = sel && prod(sel); const step = p && p.bulk ? 0.1 : 1; qtyEl.value = String(Math.max(0, r6(q + step * +st.dataset.step))).replace('.', ','); calc(); }
+      if (e.target.closest('[data-act=close]')) closeModal();
+    });
+    qtyEl.addEventListener('input', calc); dateEl.addEventListener('change', calc);
+    async function doSave(again) {
+      const p = sel && prod(sel); const q = parseDec(qtyEl.value);
+      if (!p) return toast('Pilih jenis emas dulu');
+      if (!(q > 0)) return toast('Isi jumlah dengan benar');
+      if (!p.bulk && !Number.isInteger(q)) return toast('Jumlah keping harus bilangan bulat');
+      const date = dateEl.value || today();
+      if (ttype === 'out') { const a = avail(p.id); if (q > a + 1e-9 && !(await ask('Stok tidak cukup', `Stok ${esc(p.name)} saat ini ${fQty(p, a)}, mau keluar ${fQty(p, q)}. Tetap simpan?`, 'Tetap simpan', true))) return; }
+      const rec = Object.assign(tx ? {...tx} : {id: uid(), createdAt: nowISO()}, {
+        type: ttype, pid: p.id, qty: q, date, total: parseRp($('#fTotal', el).value), note: $('#fNote', el).value.trim(), updatedAt: nowISO(), dev: S.device.name});
+      if (tx) S.tx[S.tx.findIndex(x => x.id === tx.id)] = rec; else S.tx.push(rec);
+      save(); render();
+      toast((ttype === 'in' ? '▲ Masuk ' : '▼ Keluar ') + fQty(p, q) + ' ' + p.name);
+      if (again && !tx) { qtyEl.value = '1'; $('#fTotal', el).value = ''; $('#fNote', el).value = ''; sel = null; drawChips(); }
+      else closeModal();
+    }
+    $('#fSave', el).onclick = () => doSave(false);
+    if ($('#fAgain', el)) $('#fAgain', el).onclick = () => doSave(true);
+    if ($('#fDel', el)) $('#fDel', el).onclick = async () => {
+      const p = prod(tx.pid);
+      if (!(await ask('Hapus transaksi?', `${tx.type === 'in' ? 'Masuk' : 'Keluar'} ${fQty(p, tx.qty)} ${esc(p ? p.name : '')} tanggal ${fDate(tx.date)} akan dihapus.`, 'Hapus', true))) return;
+      Object.assign(S.tx.find(x => x.id === tx.id), {deleted: true, updatedAt: nowISO()}); save(); closeModal(); render(); toast('Transaksi dihapus');
+    };
+    drawChips();
+  });
+}
+
+/* ---------- TRANSAKSI ---------- */
+const TXF = {month: 'all', type: 'all', pid: 'all'};
+VIEWS.tx = () => {
+  const all = activeTx().sort((a, b) => b.date.localeCompare(a.date) || (b.createdAt || '').localeCompare(a.createdAt || ''));
+  const months = [...new Set(all.map(t => t.date.slice(0, 7)))];
+  const list = all.filter(t => (TXF.month === 'all' || t.date.startsWith(TXF.month)) && (TXF.type === 'all' || t.type === TXF.type) && (TXF.pid === 'all' || t.pid === TXF.pid));
+  let gin = 0, gout = 0; list.forEach(t => { const g = t.qty * ((prod(t.pid) || {}).gram || 0); if (t.type === 'in') gin += g; else gout += g; });
+  let body = '', cur = null;
+  for (const t of list) {
+    if (t.date !== cur) { if (cur) body += '</div></div>'; cur = t.date; body += `<div class="dayhead"><span>${fDate(t.date, true)}</span></div><div class="card" style="padding:0 16px"><div class="list">`; }
+    body += txRow(t);
+  }
+  if (cur) body += '</div></div>';
+  const usedP = [...new Set(all.map(t => t.pid))].map(prod).filter(Boolean);
+  return `
+  <div class="top"><div><h1>Transaksi</h1><p>Semua emas masuk & keluar</p></div>
+    <div class="row-btns" style="flex:none"><button class="btn in sm" data-act="txin">+ Masuk</button><button class="btn out sm" data-act="txout">− Keluar</button></div></div>
+  <div class="filters">
+    <select data-f="month"><option value="all">Semua bulan</option>${months.map(m => `<option value="${m}" ${TXF.month === m ? 'selected' : ''}>${BULAN_P[+m.slice(5) - 1]} ${m.slice(0, 4)}</option>`).join('')}</select>
+    <select data-f="type"><option value="all">Masuk & keluar</option><option value="in" ${TXF.type === 'in' ? 'selected' : ''}>Masuk saja</option><option value="out" ${TXF.type === 'out' ? 'selected' : ''}>Keluar saja</option></select>
+    <select data-f="pid"><option value="all">Semua jenis</option>${usedP.map(p => `<option value="${p.id}" ${TXF.pid === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>
+  </div>
+  ${list.length ? `<div class="grid2 mt"><div class="card stat"><div class="k">Total masuk</div><div class="v num c-in">+${fG(gin)}</div><div class="h">${list.filter(t => t.type === 'in').length} transaksi</div></div><div class="card stat"><div class="k">Total keluar</div><div class="v num c-out">−${fG(gout)}</div><div class="h">${list.filter(t => t.type === 'out').length} transaksi</div></div></div>` : ''}
+  ${body || '<div class="card mt"><div class="empty">Belum ada transaksi' + (all.length ? ' untuk filter ini' : '') + '</div></div>'}`;
+};
+
+/* ---------- HARGA ---------- */
+let PDATE = null;
+function priceBase(date) {
+  // nilai awal form: data tanggal itu, atau harga terakhir sebelumnya per item
+  const rec = S.prices[date] && !S.prices[date].deleted ? S.prices[date] : null;
+  const val = {}, prev = {};
+  const ds = priceDates().filter(d => d < date);
+  const lastOf = (fn) => { for (let i = ds.length - 1; i >= 0; i--) { const v = fn(S.prices[ds[i]]); if (v) return v; } return null; };
+  for (const p of products(true)) {
+    if (GROUPS[p.group].priced !== 'pc') continue;
+    prev[p.id] = lastOf(r => r.p && r.p[p.id] && (r.p[p.id].b || r.p[p.id].s) ? r.p[p.id] : null);
+    val[p.id] = rec ? (rec.p && rec.p[p.id]) || null : prev[p.id];
+  }
+  prev.gram = lastOf(r => r.g && (r.g.b || r.g.s) ? r.g : null);
+  val.gram = rec ? rec.g || null : prev.gram;
+  return {rec, val, prev, from: rec ? date : ds.slice(-1)[0]};
+}
+VIEWS.price = () => {
+  const date = PDATE || today();
+  const {rec, val, prev, from} = priceBase(date);
+  const inp = (k, f, v) => `<input inputmode="numeric" data-k="${k}" data-f="${f}" value="${v ? Number(v).toLocaleString('id-ID') : ''}" placeholder="—"><span class="d" data-d="${k}:${f}"></span>`;
+  const st = stockAt();
+  let rows = '';
+  for (const g of ['dinar', 'mr']) {
+    const ps = products(true).filter(p => p.group === g && (!p.hidden || st[p.id]));
+    rows += `<tr class="grow"><td colspan="3">${GROUPS[g].name} · per keping</td></tr>` + ps.map(p => `<tr><td>${esc(p.name.replace(/^MR Gold /, ''))}</td><td>${inp(p.id, 'b', val[p.id] && val[p.id].b)}</td><td>${inp(p.id, 's', val[p.id] && val[p.id].s)}</td></tr>`).join('');
+  }
+  rows += `<tr class="grow"><td colspan="3">Emas lain · per gram</td></tr><tr><td>1 gram</td><td>${inp('gram', 'b', val.gram && val.gram.b)}</td><td>${inp('gram', 's', val.gram && val.gram.s)}</td></tr>`;
+
+  const hist = priceDates().slice().reverse();
+  const histHtml = hist.length ? '<div class="list">' + hist.slice(0, 60).map(d => {
+    const r = S.prices[d]; const d1 = r.p && r.p['dinar-1'];
+    return `<div class="li click" data-act="pdate" data-d="${d}"><div class="main"><b>${fDate(d, true)}</b><small>${Object.keys(r.p || {}).length} jenis${r.g && r.g.s ? ' · per gram ' + fRp(r.g.s) : ''}</small></div>
+      <div class="r"><b class="num">${d1 ? fRp(d1.s) : '—'}</b><small>1 Dinar buyback</small></div></div>`;
+  }).join('') + '</div>' : '<div class="empty sm">Belum ada riwayat harga</div>';
+
+  return `
+  <div class="top"><div><h1>Harga Harian</h1><p>Isi harga beli & buyback. Cukup ubah yang berubah.</p></div></div>
+  <div class="cols"><div>
+    <div class="card">
+      <div class="grid2" style="align-items:end">
+        <label class="f" style="margin:0">Tanggal harga<input type="date" id="pDate" value="${date}"></label>
+        <button class="btn" data-act="paste" style="margin-bottom:0">📋 Tempel teks harga</button>
+      </div>
+      <div class="note ${rec ? 'info' : 'warn'} mt">${rec ? 'Mengubah harga yang sudah tersimpan untuk tanggal ini.' : (from ? `Belum ada harga tanggal ini — sudah diisi dari harga ${fDate(from)}. Ubah yang berubah, lalu simpan.` : 'Belum ada harga sama sekali. Isi lalu simpan.')}</div>
+      <table class="ptab mt"><thead><tr><th>Jenis</th><th style="text-align:right">Harga beli</th><th style="text-align:right">Buyback</th></tr></thead><tbody>${rows}</tbody></table>
+      <div class="sticky-save row-btns">${rec ? '<button class="btn danger" data-act="pdel" style="flex:none">Hapus</button>' : ''}<button class="btn pri" data-act="psave">Simpan harga ${fDate(date)}</button></div>
+    </div></div>
+    <div class="card"><h2>Riwayat harga</h2>${histHtml}</div>
+  </div>`;
+};
+VIEWS.price.after = () => {
+  const date = PDATE || today(); const {prev} = priceBase(date);
+  $$('.ptab input').forEach(el => {
+    rpInput(el);
+    const upd = () => {
+      const pv = prev[el.dataset.k] && prev[el.dataset.k][el.dataset.f]; const n = parseRp(el.value); const d = $(`[data-d="${el.dataset.k}:${el.dataset.f}"]`);
+      if (!pv || !n || n === pv) { d.textContent = ''; return; }
+      const diff = n - pv; d.textContent = (diff > 0 ? '▲ ' : '▼ ') + fNum(Math.abs(diff), 0); d.className = 'd ' + (diff > 0 ? 'c-in' : 'c-out');
+    };
+    el.addEventListener('input', upd); upd();
+  });
+  $('#pDate').onchange = e => { PDATE = e.target.value || today(); render(); };
+};
+function savePrices() {
+  const date = PDATE || today();
+  const rec = {date, updatedAt: nowISO(), p: {}, g: {b: null, s: null}, dev: S.device.name};
+  $$('.ptab input').forEach(el => {
+    const n = parseRp(el.value); if (!n) return;
+    if (el.dataset.k === 'gram') rec.g[el.dataset.f] = n;
+    else { rec.p[el.dataset.k] = rec.p[el.dataset.k] || {b: null, s: null}; rec.p[el.dataset.k][el.dataset.f] = n; }
+  });
+  if (!Object.keys(rec.p).length && !rec.g.b && !rec.g.s) return toast('Belum ada harga yang diisi');
+  S.prices[date] = rec; save(); render(); toast('✓ Harga ' + fDate(date) + ' tersimpan');
+}
+function openPaste() {
+  openModal(shead('Tempel teks harga') + `<p class="muted" style="margin:0 0 10px;font-size:14px">Salin daftar harga (dari WhatsApp / dinarkr.com) lalu tempel di sini. Contoh baris: <b>1 Dinar 12.160.000 11.553.000</b> (harga beli lalu buyback).</p>
+    <textarea class="inp" id="pTxt" rows="9" placeholder="1/8 Dinar 1.602.000 1.499.000&#10;1/4 Dinar 3.054.000 2.874.000&#10;..."></textarea>
+    <div class="row-btns mt"><button class="btn pri" id="pGo">Isi ke formulir</button></div>`, el => {
+    $('[data-act=close]', el).onclick = closeModal;
+    $('#pGo', el).onclick = () => {
+      const res = parsePriceText($('#pTxt', el).value); const n = Object.keys(res).length;
+      if (!n) return toast('Tidak ada harga yang dikenali');
+      closeModal();
+      for (const k in res) for (const f of ['b', 's']) { const inp = $(`.ptab input[data-k="${k}"][data-f="${f}"]`); if (inp && res[k][f]) { inp.value = res[k][f].toLocaleString('id-ID'); inp.dispatchEvent(new Event('input')); } }
+      toast(n + ' harga terisi — cek lalu tekan Simpan', 3500);
+    };
+  });
+}
+function parsePriceText(txt) {
+  txt = txt.replace(/⅛/g, '1/8').replace(/¼/g, '1/4').replace(/½/g, '1/2');
+  const labels = [];
+  const fracMap = {'1/8': '0.125', '1/4': '0.25', '1/2': '0.5'};
+  let m; const reD = /(\d+\s*\/\s*\d+|\b\d{1,2})\s*dinar\b/gi;
+  while ((m = reD.exec(txt))) { const k = m[1].replace(/\s/g, ''); const key = fracMap[k] || k; if (prod('dinar-' + key)) labels.push({i: m.index, end: reD.lastIndex, pid: 'dinar-' + key}); }
+  const reM = /mr\s*\.?\s*gold\s*(0[.,]\d+)/gi;
+  while ((m = reM.exec(txt))) { const g = Number(m[1].replace(',', '.')); if (prod('mr-' + g)) labels.push({i: m.index, end: reM.lastIndex, pid: 'mr-' + g}); }
+  const reG = /(?:per|\/)\s*gram/gi;
+  while ((m = reG.exec(txt))) labels.push({i: m.index, end: reG.lastIndex, pid: 'gram'});
+  labels.sort((a, b) => a.i - b.i);
+  const out = {};
+  labels.forEach((l, j) => {
+    const seg = txt.slice(l.end, j + 1 < labels.length ? labels[j + 1].i : txt.length);
+    const nums = (seg.match(/\d{1,3}(?:\.\d{3})+|\d{5,}/g) || []).map(s => Number(s.replace(/\D/g, ''))).filter(n => n >= 1000);
+    if (nums.length) out[l.pid] = {b: nums[0], s: nums[1] || null};
+  });
+  return out;
+}
+
+/* ---------- LAPORAN ---------- */
+const RP = {preset: 'month', from: null, to: null, pid: 'dinar-1'};
+function periodRange() {
+  const td = today(), y = +td.slice(0, 4), mo = +td.slice(5, 7);
+  const firstAll = [activeTx().map(t => t.date).sort()[0], priceDates()[0]].filter(Boolean).sort()[0] || td;
+  switch (RP.preset) {
+    case 'month': return [td.slice(0, 8) + '01', td];
+    case 'last': { const ly = mo === 1 ? y - 1 : y, lm = mo === 1 ? 12 : mo - 1; return [ly + '-' + pad(lm) + '-01', addDays(y + '-' + pad(mo) + '-01', -1)]; }
+    case '3m': return [addDays(td, -90), td];
+    case 'year': return [y + '-01-01', td];
+    case 'custom': return [RP.from || td.slice(0, 8) + '01', RP.to || td];
+    default: return [firstAll, td];
+  }
+}
+function seriesDates(from, to) {
+  const set = new Set([from, to]);
+  priceDates().forEach(d => { if (d >= from && d <= to) set.add(d); });
+  activeTx().forEach(t => { if (t.date >= from && t.date <= to) set.add(t.date); });
+  let ds = [...set].sort();
+  if (ds.length > 400) { const k = Math.ceil(ds.length / 400); ds = ds.filter((d, i) => i % k === 0 || i === ds.length - 1); }
+  return ds;
+}
+VIEWS.report = () => {
+  const [from, to] = periodRange(); const before = addDays(from, -1);
+  const s0 = stockAt(before), s1 = stockAt(to), mv = {};
+  activeTx().forEach(t => { if (t.date < from || t.date > to) return; const x = mv[t.pid] = mv[t.pid] || {in: 0, out: 0}; x[t.type] = r6(x[t.type] + t.qty); });
+  const V0 = valuation(s0, before), V1 = valuation(s1, to);
+  let gin = 0, gout = 0; for (const k in mv) { const p = prod(k); if (!p) continue; gin += mv[k].in * p.gram; gout += mv[k].out * p.gram; }
+  const pids = products(true).filter(p => s0[p.id] || s1[p.id] || mv[p.id]);
+  const presets = [['month', 'Bulan ini'], ['last', 'Bulan lalu'], ['3m', '3 bulan'], ['year', 'Tahun ini'], ['all', 'Semua'], ['custom', 'Pilih tanggal']];
+  const dVal = V1.s - V0.s;
+
+  const ds = seriesDates(from, to);
+  const vPts = [], gPts = [];
+  ds.forEach(d => { const v = valuation(stockAt(d), d); gPts.push([dms(d), v.gram]); if (v.gram === 0 || v.s) vPts.push([dms(d), v.s]); });
+  const pp = prod(RP.pid) || prod('dinar-1');
+  const pB = [], pS = [];
+  priceDates().forEach(d => { if (d < from || d > to) return; const r = S.prices[d];
+    const x = GROUPS[pp.group].priced === 'gram' ? (r.g && {b: r.g.b && r.g.b * pp.gram, s: r.g.s && r.g.s * pp.gram}) : r.p && r.p[pp.id];
+    if (x && x.b) pB.push([dms(d), x.b]); if (x && x.s) pS.push([dms(d), x.s]); });
+
+  return `
+  <div class="top"><div><h1>Laporan</h1><p>${fDate(from)} – ${fDate(to)}</p></div><button class="btn pri sm" data-act="xlsx">⬇ Ekspor Excel</button></div>
+  <div class="pills">${presets.map(([k, l]) => `<button class="pill ${RP.preset === k ? 'on' : ''}" data-preset="${k}">${l}</button>`).join('')}</div>
+  ${RP.preset === 'custom' ? `<div class="grid2 mt"><label class="f">Dari<input type="date" id="rFrom" value="${from}"></label><label class="f">Sampai<input type="date" id="rTo" value="${to}"></label></div>` : ''}
+  <div class="grid2 mt">
+    <div class="card stat"><div class="k">Stok awal</div><div class="v num">${fG(V0.gram)}</div><div class="h">${fD(V0.dinar)}</div></div>
+    <div class="card stat"><div class="k">Stok akhir</div><div class="v num">${fG(V1.gram)}</div><div class="h">${fD(V1.dinar)}</div></div>
+    <div class="card stat"><div class="k">Masuk</div><div class="v num c-in">+${fG(gin)}</div><div class="h">≈ ${fD(gin / GPD)}</div></div>
+    <div class="card stat"><div class="k">Keluar</div><div class="v num c-out">−${fG(gout)}</div><div class="h">≈ ${fD(gout / GPD)}</div></div>
+    <div class="card stat"><div class="k">Nilai buyback akhir</div><div class="v num">${fRp(V1.s)}</div><div class="h">awal ${fRp(V0.s)}</div></div>
+    <div class="card stat"><div class="k">Perubahan nilai</div><div class="v num ${dVal >= 0 ? 'c-in' : 'c-out'}">${dVal >= 0 ? '+' : ''}${fRp(dVal)}</div><div class="h">karena harga & mutasi</div></div>
+  </div>
+  <div class="card mt"><h2>Nilai emas (buyback)</h2>${chartHTML({series: [{name: 'Nilai buyback', color: 'var(--gold)', pts: vPts}], money: true, area: true})}</div>
+  <div class="card"><h2>Jumlah emas (gram)</h2>${chartHTML({series: [{name: 'Total gram', color: 'var(--in)', pts: gPts}], step: true, area: true, zero: true})}</div>
+  <div class="card"><h2>Grafik harga <select class="inp" id="rPid" style="width:auto;min-height:36px;margin:0;padding:6px 10px;font-size:14px">${products(true).map(p => `<option value="${p.id}" ${p.id === pp.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select></h2>
+    ${chartHTML({series: [{name: 'Harga beli', color: 'var(--gold)', pts: pB}, {name: 'Buyback', color: 'var(--in)', pts: pS}], money: true})}</div>
+  <div class="card"><h2>Mutasi per jenis</h2>
+    ${pids.length ? `<div class="scroll-x"><table class="tbl"><thead><tr><th>Jenis</th><th>Awal</th><th>Masuk</th><th>Keluar</th><th>Akhir</th><th>Gram akhir</th></tr></thead><tbody>
+      ${pids.map(p => { const m = mv[p.id] || {in: 0, out: 0}; return `<tr><td>${esc(p.name)}</td><td>${fNum(s0[p.id] || 0, 4)}</td><td class="c-in">${m.in ? '+' + fNum(m.in, 4) : ''}</td><td class="c-out">${m.out ? '−' + fNum(m.out, 4) : ''}</td><td><b>${fNum(s1[p.id] || 0, 4)}</b></td><td>${fNum((s1[p.id] || 0) * p.gram, 4)}</td></tr>`; }).join('')}
+      </tbody><tfoot><tr><td>Total gram</td><td>${fNum(V0.gram, 4)}</td><td class="c-in">+${fNum(gin, 4)}</td><td class="c-out">−${fNum(gout, 4)}</td><td></td><td>${fNum(V1.gram, 4)}</td></tr></tfoot></table></div>` : '<div class="empty sm">Tidak ada data pada periode ini</div>'}
+  </div>`;
+};
+VIEWS.report.after = () => {
+  const f = $('#rFrom'), t = $('#rTo');
+  if (f) f.onchange = () => { RP.from = f.value; render(); };
+  if (t) t.onchange = () => { RP.to = t.value; render(); };
+  $('#rPid').onchange = e => { RP.pid = e.target.value; render(); };
+};
+
+/* ---------- grafik (SVG, tanpa internet) ---------- */
+function chartHTML(cfg) { CHARTS.push(cfg); return `<div class="chart" data-chart="${CHARTS.length - 1}"></div>`; }
+function drawCharts() { $$('[data-chart]').forEach(el => { const c = CHARTS[+el.dataset.chart]; if (c) drawChart(el, c); }); }
+function drawChart(el, cfg) {
+  const ser = cfg.series.filter(s => s.pts.length);
+  const all = ser.flatMap(s => s.pts);
+  if (!all.length) { el.innerHTML = '<div class="empty sm">Belum ada data untuk grafik di periode ini</div>'; return; }
+  const W = Math.max(260, el.clientWidth), H = cfg.h || 210, pl = cfg.money ? 58 : 48, pr = 10, pt = 10, pb = 26;
+  const ts = all.map(p => p[0]), vs = all.map(p => p[1]);
+  let t0 = Math.min(...ts), t1 = Math.max(...ts); if (t0 === t1) { t0 -= 3 * 864e5; t1 += 3 * 864e5; }
+  let v0 = Math.min(...vs), v1 = Math.max(...vs); if (cfg.zero) v0 = Math.min(0, v0);
+  if (v0 === v1) { const d = Math.abs(v0) * .05 || 1; v0 -= d; v1 += d; }
+  const pv = (v1 - v0) * .08; v1 += pv; if (!cfg.zero) v0 -= pv;
+  const X = t => pl + (t - t0) / (t1 - t0) * (W - pl - pr), Y = v => pt + (1 - (v - v0) / (v1 - v0)) * (H - pt - pb);
+  const yf = v => cfg.money ? fCompact(v) : fNum(v, 2);
+  let g = '';
+  for (let i = 0; i <= 4; i++) { const v = v0 + (v1 - v0) * i / 4, y = Y(v); g += `<line x1="${pl}" x2="${W - pr}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${pl - 6}" y="${y + 4}" text-anchor="end">${yf(v)}</text>`; }
+  const nx = Math.max(2, Math.min(5, Math.floor(W / 110)));
+  for (let i = 0; i < nx; i++) { const t = t0 + (t1 - t0) * i / (nx - 1); const d = new Date(t); const lbl = d.getUTCDate() + ' ' + BULAN[d.getUTCMonth()] + (t1 - t0 > 300 * 864e5 ? ' ' + String(d.getUTCFullYear()).slice(2) : ''); g += `<text x="${X(t)}" y="${H - 6}" text-anchor="${i === 0 ? 'start' : i === nx - 1 ? 'end' : 'middle'}">${lbl}</text>`; }
+  let paths = '';
+  ser.forEach((s, si) => {
+    const pts = s.pts.slice().sort((a, b) => a[0] - b[0]);
+    let d = '';
+    pts.forEach((p, i) => { const x = X(p[0]), y = Y(p[1]); if (i === 0) d += `M${x},${y}`; else if (cfg.step) d += `H${x}V${y}`; else d += `L${x},${y}`; });
+    if (cfg.area && si === 0 && pts.length > 1) paths += `<path d="${d}V${Y(Math.max(v0, Math.min(0, v1)) )}H${X(pts[0][0])}Z" fill="${s.color}" opacity=".12"/>`;
+    paths += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    if (pts.length <= 40) pts.forEach(p => paths += `<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="${pts.length === 1 ? 4 : 2.5}" fill="${s.color}"/>`);
+  });
+  el.innerHTML = `<svg width="${W}" height="${H}" role="img">${g}${paths}<line class="hl" y1="${pt}" y2="${H - pb}" stroke="var(--muted)" stroke-dasharray="3 3" style="display:none"/><g class="hd"></g></svg><div class="tip" style="display:none"></div>`
+    + (cfg.series.length > 1 ? `<div class="legend">${cfg.series.map(s => `<span style="--c:${s.color}">${s.name}</span>`).join('')}</div>` : '');
+  const svg = $('svg', el), hl = $('.hl', el), hd = $('.hd', el), tip = $('.tip', el);
+  const uts = [...new Set(ts)].sort((a, b) => a - b);
+  const valAt = (s, t) => { let v = null; for (const p of s.pts) if (p[0] <= t && (v == null || p[0] >= v[0])) v = p; return v && v[0] === t ? v[1] : (cfg.step && v ? v[1] : null); };
+  const move = e => {
+    const r = svg.getBoundingClientRect(); const x = e.clientX - r.left; const t = t0 + (x - pl) / (W - pl - pr) * (t1 - t0);
+    let best = uts[0]; for (const u of uts) if (Math.abs(u - t) < Math.abs(best - t)) best = u;
+    const bx = X(best); hl.setAttribute('x1', bx); hl.setAttribute('x2', bx); hl.style.display = '';
+    const d = new Date(best); let html = `<b>${d.getUTCDate()} ${BULAN[d.getUTCMonth()]} ${d.getUTCFullYear()}</b>`; let dots = '';
+    ser.forEach(s => { const v = valAt(s, best); if (v == null) return; html += `${s.name}: ${cfg.money ? fRp(v) : fNum(v, 4)}<br>`; dots += `<circle cx="${bx}" cy="${Y(v)}" r="4.5" fill="${s.color}" stroke="var(--card)" stroke-width="2"/>`; });
+    hd.innerHTML = dots; tip.innerHTML = html; tip.style.display = '';
+    const tw = tip.offsetWidth; tip.style.left = Math.min(Math.max(0, bx - tw / 2), W - tw) + 'px';
+  };
+  el.onpointermove = move; el.onpointerdown = move;
+  el.onpointerleave = () => { hl.style.display = 'none'; hd.innerHTML = ''; tip.style.display = 'none'; };
+}
+
+/* ---------- Excel (.xlsx tanpa internet) ---------- */
+function crc32(buf) {
+  let t = crc32.t; if (!t) { t = crc32.t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } }
+  let c = 0xFFFFFFFF; for (let i = 0; i < buf.length; i++) c = t[(c ^ buf[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0;
+}
+function makeZip(files) {
+  const enc = new TextEncoder(), parts = [], central = []; let off = 0;
+  for (const f of files) {
+    const nm = enc.encode(f.name), data = enc.encode(f.data), crc = crc32(data), sz = data.length;
+    const lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(12, 0x21, true); lh.setUint32(14, crc, true); lh.setUint32(18, sz, true); lh.setUint32(22, sz, true); lh.setUint16(26, nm.length, true);
+    parts.push(new Uint8Array(lh.buffer), nm, data);
+    const ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(14, 0x21, true); ch.setUint32(16, crc, true); ch.setUint32(20, sz, true); ch.setUint32(24, sz, true); ch.setUint16(28, nm.length, true); ch.setUint32(42, off, true);
+    central.push(new Uint8Array(ch.buffer), nm);
+    off += 30 + nm.length + sz;
+  }
+  const cds = central.reduce((a, b) => a + b.length, 0);
+  const end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true); end.setUint32(12, cds, true); end.setUint32(16, off, true);
+  return new Blob([...parts, ...central, new Uint8Array(end.buffer)], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+}
+const xesc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])).replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g, '');
+const colName = i => { let s = ''; i++; while (i) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; };
+// style: 1=judul kolom, 2=gram (0,000), 3=rupiah, 4=tebal, 5=angka bulat
+function sheetXml(rows, widths) {
+  let x = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">';
+  if (widths) x += '<cols>' + widths.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join('') + '</cols>';
+  x += '<sheetData>';
+  rows.forEach((r, ri) => {
+    x += `<row r="${ri + 1}">`;
+    r.forEach((c, ci) => {
+      if (c == null || c === '') return;
+      const cell = typeof c === 'object' ? c : {v: c}; if (cell.v == null || cell.v === '' || (typeof cell.v === 'number' && isNaN(cell.v))) return;
+      const ref = colName(ci) + (ri + 1), s = cell.s ? ` s="${cell.s}"` : '';
+      x += typeof cell.v === 'number' ? `<c r="${ref}"${s}><v>${cell.v}</v></c>` : `<c r="${ref}"${s} t="inlineStr"><is><t xml:space="preserve">${xesc(cell.v)}</t></is></c>`;
+    });
+    x += '</row>';
+  });
+  return x + '</sheetData></worksheet>';
+}
+function makeXlsx(sheets) {
+  const NS = 'http://schemas.openxmlformats.org';
+  const files = [
+    {name: '[Content_Types].xml', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="${NS}/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((s, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}</Types>`},
+    {name: '_rels/.rels', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="${NS}/package/2006/relationships"><Relationship Id="rId1" Type="${NS}/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`},
+    {name: 'xl/workbook.xml', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="${NS}/spreadsheetml/2006/main" xmlns:r="${NS}/officeDocument/2006/relationships"><sheets>${sheets.map((s, i) => `<sheet name="${xesc(s.name)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('')}</sheets></workbook>`},
+    {name: 'xl/_rels/workbook.xml.rels', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="${NS}/package/2006/relationships">${sheets.map((s, i) => `<Relationship Id="rId${i + 1}" Type="${NS}/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join('')}<Relationship Id="rId${sheets.length + 1}" Type="${NS}/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`},
+    {name: 'xl/styles.xml', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="${NS}/spreadsheetml/2006/main"><numFmts count="2"><numFmt numFmtId="164" formatCode="#,##0.000"/><numFmt numFmtId="165" formatCode="&quot;Rp&quot; #,##0"/></numFmts><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFF5EAD0"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="6"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="3" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`}
+  ];
+  sheets.forEach((s, i) => files.push({name: `xl/worksheets/sheet${i + 1}.xml`, data: sheetXml(s.rows, s.widths)}));
+  return makeZip(files);
+}
+function exportExcel() {
+  const [from, to] = periodRange(); const H = v => ({v, s: 1}), G = v => ({v, s: 2}), R = v => ({v: v == null ? null : Math.round(v), s: 3}), B = v => ({v, s: 4}), N = v => ({v, s: 5});
+  const st = stockAt(to), V = valuation(st, to);
+  const s1 = [[B('Laporan Stok Emas — per ' + fDate(to))], ['Perangkat: ' + S.device.name + ' · dibuat ' + new Date().toLocaleString('id-ID')], [],
+    ['Kelompok', 'Jenis', 'Berat/keping (g)', 'Jumlah', 'Satuan', 'Total gram', 'Setara Dinar', 'Harga tgl', 'Buyback/satuan', 'Nilai buyback', 'Beli/satuan', 'Nilai beli'].map(H)];
+  V.rows.forEach(r => s1.push([GROUPS[r.p.group].name, r.p.name, G(r.p.gram), r.p.bulk ? G(r.q) : N(r.q), unitOf(r.p), G(r.g), G(r.g / GPD), r.u ? fDate(r.u.date) + (r.u.est ? ' (perkiraan)' : '') : 'belum ada', R(r.u && r.u.s), R(r.vs), R(r.u && r.u.b), R(r.vb)]));
+  s1.push([], [B('TOTAL'), '', '', '', '', {v: V.gram, s: 2}, {v: V.dinar, s: 2}, '', '', R(V.s), '', R(V.b)]);
+  const txs = activeTx().filter(t => t.date >= from && t.date <= to).sort((a, b) => a.date.localeCompare(b.date));
+  const s2 = [[B('Transaksi ' + fDate(from) + ' – ' + fDate(to))], [], ['Tanggal', 'Jenis', 'Kelompok', 'Emas', 'Jumlah', 'Satuan', 'Gram', 'Setara Dinar', 'Nominal (Rp)', 'Catatan', 'Dicatat di'].map(H)];
+  let gi = 0, go_ = 0;
+  txs.forEach(t => { const p = prod(t.pid) || {name: '?', gram: 0, group: 'lain'}; const g = t.qty * p.gram; if (t.type === 'in') gi += g; else go_ += g;
+    s2.push([t.date, t.type === 'in' ? 'Masuk' : 'Keluar', GROUPS[p.group].name, p.name, p.bulk ? G(t.qty) : N(t.qty), unitOf(p), G(t.type === 'in' ? g : -g), G((t.type === 'in' ? g : -g) / GPD), R(t.total), t.note || '', t.dev || '']); });
+  s2.push([], [B('Total masuk (g)'), '', '', '', '', '', G(gi)], [B('Total keluar (g)'), '', '', '', '', '', G(-go_)]);
+  const s0 = stockAt(addDays(from, -1)), mv = {};
+  txs.forEach(t => { const x = mv[t.pid] = mv[t.pid] || {in: 0, out: 0}; x[t.type] += t.qty; });
+  const s3 = [[B('Mutasi stok ' + fDate(from) + ' – ' + fDate(to))], [], ['Jenis', 'Stok awal', 'Masuk', 'Keluar', 'Stok akhir', 'Satuan', 'Gram akhir'].map(H)];
+  products(true).filter(p => s0[p.id] || st[p.id] || mv[p.id]).forEach(p => { const m = mv[p.id] || {in: 0, out: 0}; s3.push([p.name, N(s0[p.id] || 0), N(m.in), N(m.out), N(st[p.id] || 0), unitOf(p), G((st[p.id] || 0) * p.gram)]); });
+  const s4 = [[B('Riwayat harga ' + fDate(from) + ' – ' + fDate(to))], [], ['Tanggal', 'Jenis', 'Harga beli', 'Buyback'].map(H)];
+  priceDates().filter(d => d >= from && d <= to).forEach(d => { const r = S.prices[d];
+    products(true).forEach(p => { const x = r.p && r.p[p.id]; if (x && (x.b || x.s)) s4.push([d, p.name + ' (per keping)', R(x.b), R(x.s)]); });
+    if (r.g && (r.g.b || r.g.s)) s4.push([d, 'Emas per gram', R(r.g.b), R(r.g.s)]); });
+  const blob = makeXlsx([
+    {name: 'Stok', rows: s1, widths: [12, 26, 15, 9, 9, 12, 13, 22, 16, 18, 16, 18]},
+    {name: 'Transaksi', rows: s2, widths: [12, 9, 12, 26, 9, 9, 12, 13, 16, 30, 14]},
+    {name: 'Mutasi', rows: s3, widths: [26, 11, 10, 10, 11, 9, 13]},
+    {name: 'Harga', rows: s4, widths: [12, 30, 16, 16]}
+  ]);
+  shareOrDownload(blob, `Laporan-Stok-Emas_${from}_sd_${to}.xlsx`);
+}
+
+/* ---------- file ---------- */
+function download(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000); }
+async function shareOrDownload(blob, name, preferShare) {
+  if (preferShare) {
+    try { const f = new File([blob], name, {type: blob.type}); if (navigator.canShare && navigator.canShare({files: [f]})) { await navigator.share({files: [f], title: name}); return true; } }
+    catch (e) { if (e.name === 'AbortError') return false; }
+  }
+  download(blob, name); return true;
+}
+function backupBlob() {
+  const data = {app: 'stok-dinar', version: 1, exportedAt: nowISO(), device: S.device, products: S.products, tx: S.tx, prices: S.prices};
+  return new Blob([JSON.stringify(data)], {type: 'application/json'});
+}
+async function doBackup(share) {
+  const name = `backup-stok-dinar_${today()}_${S.device.name.replace(/[^\w-]+/g, '-')}.json`;
+  const ok = await shareOrDownload(backupBlob(), name, share);
+  if (ok) { S.lastBackup = nowISO(); save(); render(); toast('✓ File backup dibuat: ' + name, 3500); }
+}
+function mergeData(inc) {
+  let added = 0, updated = 0;
+  const mergeArr = (arr, incArr) => {
+    const idx = new Map(arr.map((x, i) => [x.id, i]));
+    for (const x of incArr || []) {
+      if (!x || !x.id) continue; const i = idx.get(x.id);
+      if (i == null) { arr.push(x); idx.set(x.id, arr.length - 1); added++; }
+      else if ((x.updatedAt || '') > (arr[i].updatedAt || '')) { arr[i] = x; updated++; }
+    }
+  };
+  mergeArr(S.products, inc.products); mergeArr(S.tx, inc.tx);
+  for (const d in inc.prices || {}) { const r = inc.prices[d], mine = S.prices[d]; if (!mine) { S.prices[d] = r; added++; } else if ((r.updatedAt || '') > (mine.updatedAt || '')) { S.prices[d] = r; updated++; } }
+  return {added, updated};
+}
+function importFile(file) {
+  const rd = new FileReader();
+  rd.onload = () => {
+    let d; try { d = JSON.parse(rd.result); } catch (e) { return toast('File tidak bisa dibaca'); }
+    if (!d || d.app !== 'stok-dinar' || !Array.isArray(d.tx)) return toast('Ini bukan file backup Stok Dinar');
+    const nT = d.tx.filter(t => !t.deleted).length, nP = Object.values(d.prices || {}).filter(p => !p.deleted).length;
+    openModal(shead('Buka file backup') + `
+      <div class="note info">Dari: <b>${esc(d.device && d.device.name || '?')}</b> · ${d.exportedAt ? new Date(d.exportedAt).toLocaleString('id-ID') : ''}<br>${nT} transaksi · ${nP} tanggal harga</div>
+      <p style="font-size:14px"><b>Gabungkan</b> = data dari file ditambahkan ke data di perangkat ini (transaksi yang sama tidak dobel, yang terbaru dipakai). Pilih ini untuk menyatukan data antar HP/komputer.</p>
+      <p style="font-size:14px" class="muted"><b>Ganti semua</b> = data di perangkat ini dihapus & diganti isi file.</p>
+      <div class="row-btns"><button class="btn danger" id="iRep">Ganti semua</button><button class="btn pri" id="iMer">Gabungkan</button></div>`, el => {
+      $('[data-act=close]', el).onclick = closeModal;
+      $('#iMer', el).onclick = () => { const r = mergeData(d); save(); closeModal(); render(); toast(`✓ Digabung: ${r.added} data baru, ${r.updated} diperbarui`, 3500); };
+      $('#iRep', el).onclick = async () => {
+        if (!(await ask('Ganti semua data?', 'Semua data di perangkat ini akan diganti isi file backup. Lanjut?', 'Ganti semua', true))) return;
+        S.products = d.products || defaultProducts(); S.tx = d.tx; S.prices = d.prices || {};
+        for (const p of defaultProducts()) if (!S.products.find(x => x.id === p.id)) S.products.push(p);
+        save(); closeModal(); render(); toast('✓ Data diganti dari file backup');
+      };
+    });
+  };
+  rd.readAsText(file);
+}
+
+/* ---------- PENGATURAN ---------- */
+VIEWS.settings = () => {
+  const canShare = !!(navigator.canShare && window.File && navigator.canShare({files: [new File(['x'], 'x.json', {type: 'application/json'})]}));
+  const plist = GROUP_ORDER.map(g => `<div class="grp">${GROUPS[g].name} <span style="text-transform:none;letter-spacing:0;font-weight:500">· harga ${GROUPS[g].priced === 'pc' ? 'per keping' : 'per gram'}</span></div><div class="list">` +
+    products(true).filter(p => p.group === g).map(p => `<div class="li"><div class="main"><b style="${p.hidden ? 'opacity:.5' : ''}">${esc(p.name)}</b><small>${p.bulk ? 'jumlah diisi dalam gram' : fG(p.gram) + ' per keping'}${p.custom ? ' · buatan sendiri' : ''}</small></div>
+      <div class="r row-btns" style="flex-wrap:nowrap">${p.custom ? `<button class="btn sm danger" data-act="pdelp" data-id="${p.id}">Hapus</button>` : ''}<button class="btn sm" data-act="phide" data-id="${p.id}">${p.hidden ? 'Tampilkan' : 'Sembunyikan'}</button></div></div>`).join('') + '</div>').join('');
+  return `
+  <div class="top"><div><h1>Pengaturan</h1><p>Backup, PIN, dan jenis emas</p></div></div>
+  <div class="cols"><div class="stack">
+    <div class="card"><h2>💾 Backup & pindah data</h2>
+      <p class="muted" style="margin:0 0 12px;font-size:14px">Data tersimpan di perangkat ini saja (tanpa internet). Untuk menyatukan data di HP & komputer lain: <b>Buat file backup</b> → kirim lewat WhatsApp / flashdisk / email → di perangkat lain pilih <b>Buka file backup</b> → <b>Gabungkan</b>.</p>
+      <div class="row-btns">${canShare ? '<button class="btn pri" data-act="share">Kirim backup (WA, dll)</button>' : ''}<button class="btn ${canShare ? '' : 'pri'}" data-act="backup">Simpan file backup</button></div>
+      <button class="btn block mt" data-act="import">📂 Buka file backup…</button>
+      <p class="muted" style="font-size:13px;margin:10px 0 0">Backup terakhir: ${S.lastBackup ? new Date(S.lastBackup).toLocaleString('id-ID') : 'belum pernah'}</p>
+    </div>
+    <div class="card"><h2>🔒 PIN pengaman</h2>
+      <p class="muted" style="margin:0 0 12px;font-size:14px">${S.settings.pinHash ? 'PIN aktif. Aplikasi terkunci saat dibuka dan setelah ditinggal 2 menit.' : 'Belum ada PIN. Siapa pun yang memegang perangkat bisa membuka aplikasi.'}</p>
+      <div class="row-btns">${S.settings.pinHash ? '<button class="btn danger" data-act="pinoff">Matikan PIN</button><button class="btn" data-act="pinset">Ganti PIN</button>' : '<button class="btn pri" data-act="pinset">Pasang PIN</button>'}</div>
+    </div>
+    <div class="card"><h2>📱 Perangkat ini</h2>
+      <label class="f">Nama perangkat (muncul di backup & laporan)<input id="devName" value="${esc(S.device.name)}" maxlength="30"></label>
+      <p class="muted" style="font-size:13px;margin:0">Stok Dinar v${VERSION} · 1 Dinar = ${fNum(GPD)} gram · ${activeTx().length} transaksi · ${priceDates().length} tanggal harga</p>
+    </div>
+    <div class="card"><h2>Hapus semua data</h2><p class="muted" style="margin:0 0 12px;font-size:14px">Menghapus seluruh transaksi & harga di perangkat ini. Buat backup dulu.</p><button class="btn danger" data-act="wipe">Hapus semua data…</button></div>
+  </div>
+  <div class="card"><h2>Jenis emas <button class="btn sm pri" data-act="padd">+ Tambah jenis</button></h2>
+    <p class="muted" style="margin:-4px 0 6px;font-size:13.5px">Sembunyikan jenis yang tidak dipakai agar daftar lebih ringkas.</p>${plist}</div>
+  </div>`;
+};
+VIEWS.settings.after = () => {
+  const n = $('#devName'); n.onchange = () => { S.device.name = n.value.trim() || guessDevice(); save(); toast('Nama perangkat disimpan'); };
+};
+function openAddProduct() {
+  openModal(shead('Tambah jenis emas') + `
+    <label class="f">Kelompok<select id="aG"><option value="lain">Emas Lain (harga per gram)</option><option value="dinar">Dinar (harga per keping)</option><option value="mr">MR Gold (harga per keping)</option></select></label>
+    <label class="f">Berat per keping (gram)<input id="aW" inputmode="decimal" placeholder="mis. 0,5 atau 4,25"></label>
+    <label class="f">Nama<input id="aN" maxlength="40" placeholder="mis. Antam 0,5 gram / Kalung"></label>
+    <button class="btn pri block" id="aSave">Tambah</button>`, el => {
+    $('[data-act=close]', el).onclick = closeModal;
+    const w = $('#aW', el), nm = $('#aN', el), gs = $('#aG', el);
+    const sug = () => { if (nm.dataset.touched) return; const g = parseDec(w.value); if (g > 0) nm.value = gs.value === 'mr' ? 'MR Gold ' + fNum(g, 4) + ' g' : gs.value === 'dinar' ? fNum(g / GPD, 3) + ' Dinar' : 'Emas ' + fNum(g, 4) + ' gram'; };
+    w.oninput = sug; gs.onchange = sug; nm.oninput = () => nm.dataset.touched = 1;
+    $('#aSave', el).onclick = () => {
+      const g = parseDec(w.value); if (!(g > 0)) return toast('Isi berat dengan benar');
+      const name = nm.value.trim(); if (!name) return toast('Isi nama');
+      S.products.push({id: 'c-' + uid(), group: gs.value, name, gram: g, custom: true, updatedAt: nowISO()});
+      save(); closeModal(); render(); toast('✓ ' + name + ' ditambahkan');
+    };
+  });
+}
+
+/* ---------- PIN ---------- */
+async function hashPin(pin, salt) {
+  const data = new TextEncoder().encode(salt + ':' + pin);
+  if (window.crypto && crypto.subtle) { const h = await crypto.subtle.digest('SHA-256', data); return [...new Uint8Array(h)].map(b => b.toString(16).padStart(2, '0')).join(''); }
+  let h = 5381; for (let k = 0; k < 2000; k++) for (const c of data) h = ((h << 5) + h + c) | 0; return 'x' + h;
+}
+function openPinSet() {
+  openModal(shead('Pasang PIN') + `
+    <label class="f">PIN baru (4–6 angka)<input id="p1" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password"></label>
+    <label class="f">Ulangi PIN<input id="p2" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password"></label>
+    <p class="muted" style="font-size:13px;margin:0 0 12px">Ingat baik-baik. Jika lupa PIN, data hanya bisa dipulihkan dari file backup.</p>
+    <button class="btn pri block" id="pS">Simpan PIN</button>`, el => {
+    $('[data-act=close]', el).onclick = closeModal;
+    $('#pS', el).onclick = async () => {
+      const a = $('#p1', el).value, b = $('#p2', el).value;
+      if (!/^\d{4,6}$/.test(a)) return toast('PIN harus 4–6 angka');
+      if (a !== b) return toast('PIN tidak sama');
+      S.settings.pinSalt = uid(); S.settings.pinHash = await hashPin(a, S.settings.pinSalt); save(); closeModal(); render(); toast('✓ PIN dipasang');
+    };
+  });
+}
+let pinBuf = '', hiddenAt = 0;
+function lock() {
+  if (!S.settings.pinHash) return; pinBuf = ''; drawDots(); $('#lock').classList.add('show'); closeModal();
+}
+function drawDots() { $('#dots').innerHTML = Array.from({length: 6}, (_, i) => `<i class="${i < pinBuf.length ? 'f' : ''}"></i>`).join(''); }
+async function pinKey(k) {
+  if (k === 'del') pinBuf = pinBuf.slice(0, -1);
+  else if (pinBuf.length < 6) pinBuf += k;
+  drawDots();
+  if (pinBuf.length >= 4) {
+    const h = await hashPin(pinBuf, S.settings.pinSalt);
+    if (h === S.settings.pinHash) { $('#lock').classList.remove('show'); pinBuf = ''; }
+    else if (pinBuf.length === 6) { const d = $('#dots'); d.classList.add('shake'); setTimeout(() => { d.classList.remove('shake'); pinBuf = ''; drawDots(); }, 380); }
+  }
+}
+function initLock() {
+  $('#keys').innerHTML = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<button data-k="${n}">${n}</button>`).join('') + '<span></span><button data-k="0">0</button><button class="t" data-k="del">Hapus</button>';
+  $('#keys').onclick = e => { const b = e.target.closest('[data-k]'); if (b) pinKey(b.dataset.k); };
+  document.addEventListener('keydown', e => { if (!$('#lock').classList.contains('show')) return; if (/^\d$/.test(e.key)) pinKey(e.key); else if (e.key === 'Backspace') pinKey('del'); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) hiddenAt = Date.now(); else if (hiddenAt && Date.now() - hiddenAt > 120000) lock(); });
+}
+
+/* ---------- aksi ---------- */
+const ACT = {
+  close: closeModal,
+  txin: () => openTxForm('in'),
+  txout: () => openTxForm('out'),
+  edit: el => { const t = S.tx.find(x => x.id === el.dataset.id); if (t) openTxForm(t.type, t); },
+  psave: savePrices,
+  pdel: async () => { const d = PDATE || today(); if (await ask('Hapus harga?', 'Harga tanggal ' + fDate(d) + ' akan dihapus.', 'Hapus', true)) { S.prices[d] = {date: d, deleted: true, updatedAt: nowISO()}; save(); render(); toast('Harga dihapus'); } },
+  pdate: el => { PDATE = el.dataset.d; render(); window.scrollTo(0, 0); },
+  paste: openPaste,
+  xlsx: exportExcel,
+  backup: () => doBackup(false),
+  share: () => doBackup(true),
+  import: () => { const f = $('#fileIn'); f.value = ''; f.click(); },
+  pinset: openPinSet,
+  pinoff: async () => { if (await ask('Matikan PIN?', 'Aplikasi tidak akan terkunci lagi.', 'Matikan', true)) { S.settings.pinHash = null; save(); render(); toast('PIN dimatikan'); } },
+  padd: openAddProduct,
+  phide: el => { const p = prod(el.dataset.id); p.hidden = !p.hidden; p.updatedAt = nowISO(); save(); render(); },
+  pdelp: async el => {
+    const p = prod(el.dataset.id); const used = activeTx().some(t => t.pid === p.id);
+    if (used) return toast('Jenis ini sudah dipakai di transaksi — sembunyikan saja', 3500);
+    if (await ask('Hapus jenis?', esc(p.name) + ' akan dihapus.', 'Hapus', true)) { p.deleted = true; p.updatedAt = nowISO(); save(); render(); }
+  },
+  wipe: () => {
+    openModal(shead('Hapus semua data') + `<p style="margin:0 0 12px">Ketik <b>HAPUS</b> untuk menghapus semua transaksi & harga di perangkat ini. Tidak bisa dibatalkan.</p><input class="inp" id="wC" autocomplete="off"><button class="btn out block mt" id="wGo">Hapus semua</button>`, el => {
+      $('[data-act=close]', el).onclick = closeModal;
+      $('#wGo', el).onclick = () => { if ($('#wC', el).value.trim().toUpperCase() !== 'HAPUS') return toast('Ketik HAPUS untuk konfirmasi'); const keep = {device: S.device, settings: S.settings}; S = freshState(); S.prices = {}; Object.assign(S, keep); save(); closeModal(); go('home'); toast('Semua data dihapus'); };
+    });
+  }
+};
+document.addEventListener('click', e => {
+  const g = e.target.closest('[data-go]'); if (g && !e.target.closest('#modal')) { if (g.dataset.go === 'price') PDATE = null; return go(g.dataset.go); }
+  const u = e.target.closest('[data-unit]'); if (u) { S.ui.unit = u.dataset.unit; save(); return render(); }
+  const p = e.target.closest('[data-preset]'); if (p) { RP.preset = p.dataset.preset; return render(); }
+  const a = e.target.closest('[data-act]');
+  if (a && ACT[a.dataset.act] && !a.closest('#modal')) ACT[a.dataset.act](a, e); // tombol di dalam modal ditangani modalnya sendiri
+});
+document.addEventListener('change', e => { const f = e.target.closest('[data-f]'); if (f && f.tagName === 'SELECT' && VIEW === 'tx') { TXF[f.dataset.f] = f.value; render(); } });
+$('#fileIn').addEventListener('change', e => { const f = e.target.files[0]; if (f) importFile(f); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+let rsT; window.addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(drawCharts, 150); });
+
+/* ---------- start ---------- */
+S = load(); save();
+initLock();
+render();
+if (S.settings.pinHash) lock();
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
