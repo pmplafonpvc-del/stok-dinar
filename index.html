@@ -239,7 +239,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold-2);outline-
 
 <script>
 'use strict';
-const VERSION = '1.0.0';
+const VERSION = '1.1.0';
 const KEY = 'stokdinar.v1';
 const GPD = 4.25; // gram per 1 Dinar
 const GROUPS = {
@@ -281,7 +281,7 @@ function guessDevice() { const u = navigator.userAgent; if (/iPhone/.test(u)) re
 /* ---------- data ---------- */
 function defaultProducts() {
   const out = [];
-  [['0.125','1/8'],['0.25','1/4'],['0.5','1/2'],['1','1'],['2','2'],['3','3'],['4','4'],['5','5'],['7','7'],['8','8'],['10','10'],['20','20']]
+  [['0.0625','1/16'],['0.125','1/8'],['0.25','1/4'],['0.5','1/2'],['1','1'],['2','2'],['3','3'],['4','4'],['5','5'],['7','7'],['8','8'],['10','10'],['20','20']]
     .forEach(([k, l]) => out.push({id: 'dinar-' + k, group: 'dinar', name: l + ' Dinar', gram: +k * GPD, updatedAt: BASE_TS}));
   [0.025, 0.05, 0.1, 0.2, 0.5]
     .forEach(g => out.push({id: 'mr-' + g, group: 'mr', name: 'MR Gold ' + String(g).replace('.', ',') + ' g', gram: g, updatedAt: BASE_TS}));
@@ -667,7 +667,7 @@ function openPaste() {
 function parsePriceText(txt) {
   txt = txt.replace(/⅛/g, '1/8').replace(/¼/g, '1/4').replace(/½/g, '1/2');
   const labels = [];
-  const fracMap = {'1/8': '0.125', '1/4': '0.25', '1/2': '0.5'};
+  const fracMap = {'1/16': '0.0625', '1/8': '0.125', '1/4': '0.25', '1/2': '0.5'};
   let m; const reD = /(\d+\s*\/\s*\d+|\b\d{1,2})\s*dinar\b/gi;
   while ((m = reD.exec(txt))) { const k = m[1].replace(/\s/g, ''); const key = fracMap[k] || k; if (prod('dinar-' + key)) labels.push({i: m.index, end: reD.lastIndex, pid: 'dinar-' + key}); }
   const reM = /mr\s*\.?\s*gold\s*(0[.,]\d+)/gi;
