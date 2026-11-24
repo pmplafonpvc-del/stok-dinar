@@ -1,6 +1,6 @@
 // Service worker: simpan aplikasi di perangkat agar bisa dibuka tanpa internet.
 // Naikkan versi CACHE setiap kali file aplikasi diubah.
-const CACHE = 'stokdinar-v1.2.0';
+const CACHE = 'stokdinar-v1.2.1';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {

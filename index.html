@@ -239,7 +239,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold-2);outline-
 
 <script>
 'use strict';
-const VERSION = '1.2.0';
+const VERSION = '1.2.1';
 const KEY = 'stokdinar.v1';
 const GPD = 4.25; // gram per 1 Dinar
 const GROUPS = {
@@ -302,8 +302,19 @@ function freshState() {
 }
 // Harga bawaan yang ikut terkirim lewat update aplikasi. Harga yang diisi sendiri di perangkat tidak ditimpa.
 const BUILTIN_PRICES = {
-  '2026-11-24': {date: '2026-11-24', updatedAt: '2026-11-24T00:00:00.000Z', builtin: true, g: {b: null, s: null},
-                 p: {'dinar-6': {b: 68208000, s: 65480000}}}
+  // Harga resmi DinarKR & MR Gold 24 Nov 2026 10.03 WIB
+  '2026-11-24': {date: '2026-11-24', updatedAt: '2026-11-24T03:03:00.000Z', builtin: true, g: {b: null, s: null}, p: {
+    'dinar-0.0625': {b: 763000, s: 711000},       'dinar-0.125': {b: 1512000, s: 1414000},
+    'dinar-0.25':   {b: 2873000, s: 2704000},     'dinar-0.5':   {b: 5718000, s: 5415000},
+    'dinar-1':      {b: 11424000, s: 10853000},   'dinar-2':     {b: 22774000, s: 21681000},
+    'dinar-3':      {b: 34170000, s: 32598000},   'dinar-4':     {b: 45523000, s: 43521000},
+    'dinar-5':      {b: 56854000, s: 54466000},   'dinar-6':     {b: 68208000, s: 65480000},
+    'dinar-7':      {b: 79596000, s: 76572000},   'dinar-8':     {b: 90886000, s: 87705000},
+    'dinar-10':     {b: 113580000, s: 110174000}, 'dinar-20':    {b: 227060000, s: 220929000},
+    'c-paket-exklusif': {b: 182209000, s: 173942000},
+    'mr-0.025': {b: 103000, s: 86500},   'mr-0.05': {b: 179000, s: 152200},  'mr-0.1': {b: 332000, s: 288800},
+    'mr-0.2':   {b: 656000, s: 590400},  'mr-0.5':  {b: 1377000, s: 1253100}
+  }}
 };
 function applyBuiltinPrices(s) {
   for (const d in BUILTIN_PRICES) {
