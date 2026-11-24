@@ -239,7 +239,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold-2);outline-
 
 <script>
 'use strict';
-const VERSION = '1.1.0';
+const VERSION = '1.2.0';
 const KEY = 'stokdinar.v1';
 const GPD = 4.25; // gram per 1 Dinar
 const GROUPS = {
@@ -281,7 +281,7 @@ function guessDevice() { const u = navigator.userAgent; if (/iPhone/.test(u)) re
 /* ---------- data ---------- */
 function defaultProducts() {
   const out = [];
-  [['0.0625','1/16'],['0.125','1/8'],['0.25','1/4'],['0.5','1/2'],['1','1'],['2','2'],['3','3'],['4','4'],['5','5'],['7','7'],['8','8'],['10','10'],['20','20']]
+  [['0.0625','1/16'],['0.125','1/8'],['0.25','1/4'],['0.5','1/2'],['1','1'],['2','2'],['3','3'],['4','4'],['5','5'],['6','6'],['7','7'],['8','8'],['10','10'],['20','20']]
     .forEach(([k, l]) => out.push({id: 'dinar-' + k, group: 'dinar', name: l + ' Dinar', gram: +k * GPD, updatedAt: BASE_TS}));
   [0.025, 0.05, 0.1, 0.2, 0.5]
     .forEach(g => out.push({id: 'mr-' + g, group: 'mr', name: 'MR Gold ' + String(g).replace('.', ',') + ' g', gram: g, updatedAt: BASE_TS}));
@@ -300,6 +300,17 @@ function freshState() {
   return {v: 1, device: {id: uid(), name: guessDevice()}, products: defaultProducts(), tx: [], prices: seedPrices(),
           settings: {pinHash: null, pinSalt: null}, ui: {unit: 'gram'}, lastBackup: null};
 }
+// Harga bawaan yang ikut terkirim lewat update aplikasi. Harga yang diisi sendiri di perangkat tidak ditimpa.
+const BUILTIN_PRICES = {
+  '2026-11-24': {date: '2026-11-24', updatedAt: '2026-11-24T00:00:00.000Z', builtin: true, g: {b: null, s: null},
+                 p: {'dinar-6': {b: 68208000, s: 65480000}}}
+};
+function applyBuiltinPrices(s) {
+  for (const d in BUILTIN_PRICES) {
+    const r = BUILTIN_PRICES[d], mine = s.prices[d];
+    if (!mine || (mine.builtin && (mine.updatedAt || '') < r.updatedAt)) s.prices[d] = JSON.parse(JSON.stringify(r));
+  }
+}
 let S;
 function load() {
   let s = null; try { s = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
@@ -307,6 +318,7 @@ function load() {
   for (const p of defaultProducts()) if (!s.products.find(x => x.id === p.id)) s.products.push(p);
   s.tx = s.tx || []; s.prices = s.prices || {}; s.settings = s.settings || {}; s.ui = s.ui || {unit: 'gram'};
   s.device = s.device || {id: uid(), name: guessDevice()};
+  applyBuiltinPrices(s);
   return s;
 }
 function save() {
@@ -586,10 +598,10 @@ function priceBase(date) {
   for (const p of products(true)) {
     if (GROUPS[p.group].priced !== 'pc') continue;
     prev[p.id] = lastOf(r => r.p && r.p[p.id] && (r.p[p.id].b || r.p[p.id].s) ? r.p[p.id] : null);
-    val[p.id] = rec ? (rec.p && rec.p[p.id]) || null : prev[p.id];
+    val[p.id] = (rec && rec.p && rec.p[p.id]) || prev[p.id];
   }
   prev.gram = lastOf(r => r.g && (r.g.b || r.g.s) ? r.g : null);
-  val.gram = rec ? rec.g || null : prev.gram;
+  val.gram = (rec && rec.g && (rec.g.b || rec.g.s)) ? rec.g : prev.gram;
   return {rec, val, prev, from: rec ? date : ds.slice(-1)[0]};
 }
 VIEWS.price = () => {
